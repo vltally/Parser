@@ -3,5 +3,7 @@
 public class SubtractionOperation : IOperation
 {
     public OperationPriority OperationPriority => OperationPriority.Low;
+
+    public char Symbol { get; } = '-';
     public Func<double, double, double> Execute => (leftOperand, rightOperand) => leftOperand - rightOperand;
 }

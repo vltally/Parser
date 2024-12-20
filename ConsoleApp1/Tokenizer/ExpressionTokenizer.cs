@@ -13,7 +13,7 @@ public sealed class ExpressionTokenizer : ITokenizer
     private const string Whitespace = " ";
     private const string UnexpectedCharacterMessage = "Unexpected character '{0}' at position {1}.";
 
-    private readonly OperationFactory _operationFactory = new();
+    private readonly OperationManager _operationManager = new();
 
     /// <summary>
     /// Converts the given <paramref name="input"/> expression string into a list of <see cref="Token"/> objects.
@@ -85,7 +85,7 @@ public sealed class ExpressionTokenizer : ITokenizer
     /// </returns>
     private OperationToken? CreateOperationToken(char currentChar)
     {
-        IOperation? operation = _operationFactory.GetOperation(currentChar);
+        IOperation? operation = _operationManager.GetOperation(currentChar);
         return operation != null ? new OperationToken(operation) : null;
     }
 

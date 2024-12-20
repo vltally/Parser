@@ -3,6 +3,8 @@
 public sealed class DivisionOperation : IOperation
 {
     public OperationPriority OperationPriority => OperationPriority.Medium;
+    
+    public char Symbol { get; } = '/';
 
     public Func<double, double, double> Execute => (leftOperand, rightOperand) =>
     {

@@ -31,6 +31,8 @@ public interface IOperation
     /// </value>
     OperationPriority OperationPriority { get; }
 
+    char Symbol { get; }
+    
     /// <summary>
     /// Gets the function that executes this operation given two operands.
     /// </summary>
