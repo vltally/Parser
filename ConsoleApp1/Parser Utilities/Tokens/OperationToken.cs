@@ -2,13 +2,7 @@
 
 namespace ConsoleApp1.Parser_Utilities.Tokens;
 
-public class OperationToken : Token
+public class OperationToken(IOperation operation) : Token
 {
-    public IOperation Operation { get; }
-
-    public OperationToken(IOperation operation)
-    {
-        Operation = operation;
-    }
-    
+    public IOperation Operation { get; } = operation;
 }

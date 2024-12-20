@@ -1,8 +1,9 @@
 ﻿namespace ConsoleApp1.Parser_Utilities.Nodes;
 
-internal class NumberNode : Node
+public class NumberNode(double value) : Node
 {
-    public float Value { get; }
-    public NumberNode(float value) => Value = value;
-    public override double Evaluate() => Value;
+    public override double Evaluate()
+    {
+        return value;
+    }
 }
