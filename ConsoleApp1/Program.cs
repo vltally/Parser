@@ -2,6 +2,7 @@
 using ConsoleApp1.Parser_Utilities;
 using ConsoleApp1.Parser_Utilities.Nodes;
 using ConsoleApp1.Tokenizer;
+using ConsoleApp1.Validator;
 
 namespace ConsoleApp1;
 
@@ -9,8 +10,16 @@ public class Program
 {
     private static void Main()
     {
-        const string input = "3%2+4*(20-5*(100+3)+16*2)^2-18/2^2";
+        const string input = "3%2+4*(20-5*(100+3)+16*2)^2-18/2^2^2^2";
 
+        List<IValidator> validators = new()
+        {
+            new LetterValidator(),
+            new ParenValidator()
+        };
+        validators.ForEach(validator => validator.ValidateExpression(input));
+        
+        
         ITokenizer tokenizer = new ExpressionTokenizer();
         IParser parser = new ExpressionParser();
         INodeEvaluator nodeEvaluator = new NodeEvaluator();
