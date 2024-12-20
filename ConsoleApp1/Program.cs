@@ -5,7 +5,7 @@ using ConsoleApp1.Tokenizer;
 
 namespace ConsoleApp1;
 
-internal class Program
+public class Program
 {
     private static void Main()
     {
@@ -16,8 +16,16 @@ internal class Program
         INodeEvaluator nodeEvaluator = new NodeEvaluator();
         IExpressionEvaluator evaluator = new ExpressionEvaluator(tokenizer, parser, nodeEvaluator);
 
-        Console.WriteLine($"Input: {input}");
-        double result = evaluator.Evaluate(input);
-        Console.WriteLine($"Result: {Math.Round(result, 2)}");
+        try
+        {
+            Console.WriteLine($"Input: {input}");
+            double result = evaluator.Evaluate(input);
+            Console.WriteLine($"Result: {Math.Round(result, 2)}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred while evaluating the expression:");
+            Console.WriteLine(ex.Message);
+        }
     }
 }

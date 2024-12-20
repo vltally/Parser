@@ -3,7 +3,16 @@ using ConsoleApp1.Parser_Utilities.Operations.Supported;
 
 namespace ConsoleApp1.Parser_Utilities;
 
-internal sealed class OperationFactory
+/// <summary>
+/// Provides a factory for creating <see cref="IOperation"/> instances based on a given operator symbol.
+/// </summary>
+/// <remarks>
+/// The <see cref="OperationFactory"/> maps single-character symbols (e.g., '+', '-', '*') 
+/// to functions that construct corresponding <see cref="IOperation"/> instances. 
+/// This allows the parser and tokenizer to remain generic and operation-agnostic, 
+/// while enabling new operations to be added by simply extending the dictionary.
+/// </remarks>
+public sealed class OperationFactory
 {
     private readonly Dictionary<char, Func<IOperation>> _operations = new()
     {
@@ -12,21 +21,38 @@ internal sealed class OperationFactory
         { '*', () => new MultiplicationOperation() },
         { '/', () => new DivisionOperation() },
         { '%', () => new ModulusOperation() },
-        { '^', () => new PowerOperation() },
+        { '^', () => new PowerOperation() }
     };
 
+    /// <summary>
+    /// Retrieves an <see cref="IOperation"/> instance for the given operator symbol.
+    /// </summary>
+    /// <param name="symbol">A character representing a mathematical operator (e.g., '+', '*').</param>
+    /// <returns>
+    /// An <see cref="IOperation"/> instance corresponding to the specified symbol, 
+    /// or <c>null</c> if the symbol is not recognized.
+    /// </returns>
+    /// <remarks>
+    /// The method returns <c>null</c> if the provided symbol is not found in the dictionary, 
+    /// enabling callers to handle unknown operators gracefully.
+    /// </remarks>
     public IOperation? GetOperation(char symbol)
     {
-        if (_operations.ContainsKey(symbol) is not true)
+        // First check if the symbol is recognized.
+        if (!_operations.ContainsKey(symbol))
         {
+            // Unknown operator symbol: return null, allowing caller to handle it as needed.
             return null;
         }
-        
-        if (_operations.TryGetValue(symbol, out Func<IOperation>? value))
+
+        // Retrieve and invoke the factory method to create the operation.
+        if (_operations.TryGetValue(symbol, out Func<IOperation>? factory))
         {
-            return value();
+            return factory();
         }
 
-        throw new Exception("Unknown operation symbol.");
+        // This scenario is theoretically unreachable given the ContainsKey check, 
+        // but throwing an exception to indicate a coding error is safer.
+        throw new InvalidOperationException("Operation factory failed to create an instance unexpectedly.");
     }
 }
