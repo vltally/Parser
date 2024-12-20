@@ -1,6 +1,6 @@
 ﻿namespace ConsoleApp1.Parser_Utilities.Operations;
 
-public enum Priority
+public enum OperationPriority
 {
     Low,
     Medium,

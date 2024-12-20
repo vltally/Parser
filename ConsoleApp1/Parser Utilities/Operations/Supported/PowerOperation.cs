@@ -2,7 +2,7 @@
 
 public sealed class PowerOperation : IOperation
 {
-    public Priority Priority => Priority.High;
+    public OperationPriority OperationPriority => OperationPriority.High;
     public Func<double, double, double> Execute => Math.Pow;  
 }
 

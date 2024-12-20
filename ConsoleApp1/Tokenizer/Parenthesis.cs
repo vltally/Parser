@@ -1,6 +1,4 @@
-﻿using ConsoleApp1.Parser_Utilities.Tokens;
-
-namespace ConsoleApp1.Tokenizer;
+﻿namespace ConsoleApp1.Tokenizer;
 
 public sealed class Parenthesis : Token
 {

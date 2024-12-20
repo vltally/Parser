@@ -2,6 +2,6 @@
 
 public interface IOperation
 {
-    Priority Priority { get; }
+    OperationPriority OperationPriority { get; }
     Func<double, double, double> Execute { get; }
 }

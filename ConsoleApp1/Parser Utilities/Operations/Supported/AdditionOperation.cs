@@ -2,6 +2,6 @@
 
 public sealed class AdditionOperation : IOperation
 {
-    public Priority Priority => Priority.Low;
+    public OperationPriority OperationPriority => OperationPriority.Low;
     public Func<double, double, double> Execute { get; } = (leftOperand, rightOperand) => leftOperand + rightOperand;
 }

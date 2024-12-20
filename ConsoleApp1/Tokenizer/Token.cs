@@ -1,3 +1,3 @@
-﻿namespace ConsoleApp1.Parser_Utilities.Tokens;
+﻿namespace ConsoleApp1.Tokenizer;
 
 public abstract class Token;

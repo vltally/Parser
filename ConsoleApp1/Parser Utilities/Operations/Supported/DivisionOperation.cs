@@ -2,7 +2,7 @@
 
 public sealed class DivisionOperation : IOperation
 {
-    public Priority Priority => Priority.Medium;
+    public OperationPriority OperationPriority => OperationPriority.Medium;
 
     public Func<double, double, double> Execute => (leftOperand, rightOperand) =>
     {

@@ -1,99 +1,113 @@
 using ConsoleApp1.Parser_Utilities.Nodes;
 using ConsoleApp1.Parser_Utilities.Operations;
-using ConsoleApp1.Parser_Utilities.Tokens;
 using ConsoleApp1.Tokenizer;
 
-namespace ConsoleApp1.Parser_Utilities;
-
-public sealed class ExpressionParser : IParser
+namespace ConsoleApp1.Parser_Utilities
 {
-    private List<Token> _tokens = null!;
-    private int _currentTokenIndex;
-
-    public Node Parse(List<Token> tokens)
+    public sealed class ExpressionParser : IParser
     {
-        _tokens = tokens;
-        _currentTokenIndex = 0;
-        
-        Node root = ParseLowestPriority();
+        private const string NoTokensErrorMessage = "No tokens were provided to parse.";
+        private const string UnexpectedEndErrorMessage = "Unexpected end of tokens while parsing primary.";
+        private const string ExtraTokensErrorMessage = "Extra tokens found after parsing completed.";
+        private const string MissingClosingParenthesisErrorMessage = "Missing closing parenthesis.";
+        private const string InvalidOperationTokenErrorMessage = "Expected an operation token at this position.";
+        private const string InvalidNumberFormatErrorMessage = "Invalid number format: {0}";
+        private const string UnexpectedTokenErrorMessage = "Unexpected token {0} at position {1}.";
 
-        if (_currentTokenIndex < _tokens.Count)
+        private List<Token> _tokens = null!;
+        private int _currentTokenIndex;
+
+        public Node Parse(List<Token> tokens)
         {
-            throw new InvalidOperationException("Extra tokens found after parsing completed.");
+            if (tokens == null) 
+                throw new ArgumentNullException(nameof(tokens), NoTokensErrorMessage);
+
+            if (tokens.Count == 0)
+                throw new InvalidOperationException(NoTokensErrorMessage);
+
+            _tokens = tokens;
+            _currentTokenIndex = 0;
+
+            Node root = ParseLowestPriority();
+
+            if (_currentTokenIndex < _tokens.Count)
+                throw new InvalidOperationException(ExtraTokensErrorMessage);
+
+            return root;
         }
 
-        return root;
-    }
-
-    private Node ParsePrimary()
-    {
-        if (_currentTokenIndex >= _tokens.Count)
-            throw new InvalidOperationException("Unexpected end of tokens while parsing primary.");
-
-        Token currentToken = _tokens[_currentTokenIndex];
-
-        if (currentToken is OperandToken operandToken)
+        private Node ParsePrimary()
         {
-            if (!int.TryParse(operandToken.Value, out int value))
-                throw new FormatException($"Invalid number format: {operandToken.Value}");
+            if (_currentTokenIndex >= _tokens.Count)
+                throw new InvalidOperationException(UnexpectedEndErrorMessage);
 
-            _currentTokenIndex++;
-            return new NumberNode(value);
+            Token currentToken = _tokens[_currentTokenIndex];
+
+            if (currentToken is OperandToken operandToken)
+            {
+                if (!int.TryParse(operandToken.Value, out int numericValue))
+                    throw new FormatException(string.Format(InvalidNumberFormatErrorMessage, operandToken.Value));
+
+                _currentTokenIndex++;
+                return new NumberNode(numericValue);
+            }
+
+            if (currentToken is Parenthesis parenthesis && parenthesis.Direction == ParenthesisDirection.Left)
+            {
+                _currentTokenIndex++; // consume '('
+                Node expression = ParseLowestPriority();
+
+                if (_currentTokenIndex >= _tokens.Count ||
+                    !(_tokens[_currentTokenIndex] is Parenthesis closeParen) ||
+                    closeParen.Direction != ParenthesisDirection.Right)
+                {
+                    throw new InvalidOperationException(MissingClosingParenthesisErrorMessage);
+                }
+
+                _currentTokenIndex++; // consume ')'
+                return expression;
+            }
+
+            throw new InvalidOperationException(
+                string.Format(UnexpectedTokenErrorMessage, currentToken.GetType().Name, _currentTokenIndex));
         }
 
-        if (currentToken is Parenthesis paren && paren.Direction == ParenthesisDirection.Left)
+        private Node ParseBinaryOperation(Func<Node> parseNextLevel, OperationPriority operationPriority)
         {
-            _currentTokenIndex++; // consume '('
-            Node expression = ParseLowestPriority();
+            Node leftNode = parseNextLevel();
+            while (IsOperationWithPriority(operationPriority))
+            {
+                OperationToken operationToken = GetOperationToken();
+                Func<double, double, double> operationFunc = operationToken.Operation.Execute;
 
-            if (_currentTokenIndex >= _tokens.Count || !(_tokens[_currentTokenIndex] is Parenthesis closeParen) ||
-                closeParen.Direction != ParenthesisDirection.Right)
-                throw new InvalidOperationException("Missing closing parenthesis.");
+                _currentTokenIndex++;
+                Node rightNode = parseNextLevel();
+                leftNode = new BinaryOperationNode(leftNode, rightNode, operationFunc);
+            }
 
-            _currentTokenIndex++; 
-            return expression;
+            return leftNode;
         }
 
-        throw new InvalidOperationException(
-            $"Unexpected token {currentToken.GetType().Name} at position {_currentTokenIndex}.");
-    }
-
-    private Node ParseBinaryOperation(Func<Node> parseNextLevel, Priority priority)
-    {
-        Node left = parseNextLevel();
-        while (IsOperationWithPriority(priority))
+        private OperationToken GetOperationToken()
         {
-            OperationToken opToken = GetOperationToken();
-            Func<double, double, double> operationFunc = opToken.Operation.Execute;
-            _currentTokenIndex++;
-            Node right = parseNextLevel();
-            left = new BinaryOperationNode(left, right, operationFunc);
+            if (_currentTokenIndex >= _tokens.Count || _tokens[_currentTokenIndex] is not OperationToken opToken)
+                throw new InvalidOperationException(InvalidOperationTokenErrorMessage);
+
+            return opToken;
         }
 
-        return left;
+        private bool IsOperationWithPriority(OperationPriority operationPriority) =>
+             _currentTokenIndex < _tokens.Count &&
+                   _tokens[_currentTokenIndex] is OperationToken opToken &&
+                   opToken.Operation.OperationPriority == operationPriority;
+
+        private Node ParseLowestPriority() =>
+            ParseBinaryOperation(ParseMediumPriority, OperationPriority.Low);
+
+        private Node ParseMediumPriority() =>
+            ParseBinaryOperation(ParseHigherPriority, OperationPriority.Medium);
+
+        private Node ParseHigherPriority() =>
+            ParseBinaryOperation(ParsePrimary, OperationPriority.High);
     }
-
-    private OperationToken GetOperationToken()
-    {
-        if (_currentTokenIndex >= _tokens.Count || _tokens[_currentTokenIndex] is not OperationToken opToken)
-            throw new InvalidOperationException("Expected an operation token at this position.");
-
-        return opToken;
-    }
-
-    private bool IsOperationWithPriority(Priority priority)
-    {
-        return _currentTokenIndex < _tokens.Count &&
-               _tokens[_currentTokenIndex] is OperationToken opToken &&
-               opToken.Operation.Priority == priority;
-    }
-
-    private Node ParseLowestPriority() =>
-        ParseBinaryOperation(ParseMediumPriority, Priority.Low);
-
-    private Node ParseMediumPriority() =>
-        ParseBinaryOperation(ParseHigherPriority, Priority.Medium);
-
-    private Node ParseHigherPriority() =>
-        ParseBinaryOperation(ParsePrimary, Priority.High);
 }

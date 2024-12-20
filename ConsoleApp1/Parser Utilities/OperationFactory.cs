@@ -8,7 +8,7 @@ internal sealed class OperationFactory
     private readonly Dictionary<char, Func<IOperation>> _operations = new()
     {
         { '+', () => new AdditionOperation() },
-        { '-', () => new Subtraction() },
+        { '-', () => new SubtractionOperation() },
         { '*', () => new MultiplicationOperation() },
         { '/', () => new DivisionOperation() },
         { '%', () => new ModulusOperation() },

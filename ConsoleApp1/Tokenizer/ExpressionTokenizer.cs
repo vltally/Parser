@@ -1,40 +1,42 @@
 using ConsoleApp1.Parser_Utilities;
 using ConsoleApp1.Parser_Utilities.Operations;
-using ConsoleApp1.Parser_Utilities.Tokens;
 
 namespace ConsoleApp1.Tokenizer;
 
 public sealed class ExpressionTokenizer : ITokenizer
 {
+    private const string Whitespace = " ";
+    private const string UnexpectedCharacterMessage = "Unexpected character '{0}' at position {1}.";
+
     private readonly OperationFactory _operationFactory = new();
 
     public List<Token> Tokenize(string input)
     {
-        if (input == null) throw new ArgumentNullException(nameof(input));
+        input = input.Replace(Whitespace, string.Empty);
 
         List<Token> tokens = [];
-        input = input.Replace(" ", "");
-
         int currentIndex = 0;
+
         while (currentIndex < input.Length)
         {
-            char currentCharacter = input[currentIndex];
-            Token? operation = CreateOperationToken(currentCharacter);
-            if (operation != null)
+            char currentChar = input[currentIndex];
+
+            Token? operationToken = CreateOperationToken(currentChar);
+            if (operationToken != null)
             {
-                tokens.Add(operation);
+                tokens.Add(operationToken);
                 currentIndex++;
                 continue;
             }
 
-            Token? operand = CreateOperandToken(ref input, ref currentIndex);
-            if (operand != null)
+            Token? operandToken = CreateOperandToken(ref input, ref currentIndex);
+            if (operandToken != null)
             {
-                tokens.Add(operand);
+                tokens.Add(operandToken);
                 continue;
             }
 
-            Parenthesis parenthesis = new(currentCharacter);
+            Parenthesis parenthesis = new(currentChar);
             if (parenthesis.Direction != ParenthesisDirection.None)
             {
                 tokens.Add(parenthesis);
@@ -43,15 +45,15 @@ public sealed class ExpressionTokenizer : ITokenizer
             }
 
             throw new InvalidOperationException(
-                $"Unexpected character '{currentCharacter}' at position {currentIndex}.");
+                string.Format(UnexpectedCharacterMessage, currentChar, currentIndex));
         }
 
         return tokens;
     }
 
-    private OperationToken? CreateOperationToken(char currentCharacter)
+    private OperationToken? CreateOperationToken(char currentChar)
     {
-        IOperation? operation = _operationFactory.GetOperation(currentCharacter);
+        IOperation? operation = _operationFactory.GetOperation(currentChar);
         return operation != null ? new OperationToken(operation) : null;
     }
 
@@ -60,7 +62,7 @@ public sealed class ExpressionTokenizer : ITokenizer
         if (currentIndex >= input.Length || !char.IsDigit(input[currentIndex]))
             return null;
 
-        string number = "";
+        string number = string.Empty;
         while (currentIndex < input.Length && char.IsDigit(input[currentIndex]))
         {
             number += input[currentIndex];
