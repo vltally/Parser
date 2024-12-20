@@ -4,5 +4,5 @@ namespace ConsoleApp1.Tokenizer;
 
 public interface ITokenizer
 {
-    IEnumerable<Token> Tokenize(string inputCharacters);
+    List<Token> Tokenize(string inputCharacters);
 }

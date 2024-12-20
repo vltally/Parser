@@ -8,7 +8,7 @@ public sealed class ExpressionTokenizer : ITokenizer
 {
     private readonly OperationFactory _operationFactory = new();
 
-    public IEnumerable<Token> Tokenize(string input)
+    public List<Token> Tokenize(string input)
     {
         if (input == null) throw new ArgumentNullException(nameof(input));
 
@@ -34,10 +34,10 @@ public sealed class ExpressionTokenizer : ITokenizer
                 continue;
             }
 
-            Paren paren = new(currentCharacter);
-            if (paren.Direction != ParenthesisDirection.None)
+            Parenthesis parenthesis = new(currentCharacter);
+            if (parenthesis.Direction != ParenthesisDirection.None)
             {
-                tokens.Add(paren);
+                tokens.Add(parenthesis);
                 currentIndex++;
                 continue;
             }

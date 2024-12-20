@@ -1,7 +1,3 @@
-/*namespace ConsoleApp1.Tokenizer;
+﻿namespace ConsoleApp1.Parser_Utilities.Tokens;
 
-public sealed class Token(TokenType type, string value)
-{
-    public TokenType Type { get; } = type;
-    public string Value { get; } = value;
-}*/
+public abstract class Token;

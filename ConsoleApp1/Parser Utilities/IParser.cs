@@ -5,5 +5,5 @@ namespace ConsoleApp1.Parser_Utilities;
 
 public interface IParser
 {
-    Node Parse(IEnumerable<Token> tokens);
+    Node Parse(List<Token> tokens);
 }

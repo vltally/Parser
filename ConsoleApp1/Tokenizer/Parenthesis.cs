@@ -1,17 +1,9 @@
-﻿using ConsoleApp1.Tokenizer;
+﻿using ConsoleApp1.Parser_Utilities.Tokens;
 
-namespace ConsoleApp1.Parser_Utilities.Tokens;
+namespace ConsoleApp1.Tokenizer;
 
-public enum ParenthesisDirection : byte
+public sealed class Parenthesis : Token
 {
-    None,  // 0
-    Left,  // 1
-    Right  // 2
-}
-
-public class Paren : Token
-{
-    
     private readonly Dictionary<char, ParenthesisDirection> _parenthesisMap = new()
     {
         { '(', ParenthesisDirection.Left },
@@ -20,7 +12,7 @@ public class Paren : Token
 
     public ParenthesisDirection Direction { get; }
 
-    public Paren(char parenthesis)
+    public Parenthesis(char parenthesis)
     {
         if (!_parenthesisMap.TryGetValue(parenthesis, out var direction))
         {
@@ -30,7 +22,7 @@ public class Paren : Token
         Direction = direction;
     }
 
-    public string GetValue()
+    private string GetValue()
     {
         return _parenthesisMap.FirstOrDefault(x => x.Value == Direction).Key.ToString();
     }

@@ -10,7 +10,7 @@ public sealed class ExpressionEvaluator(ITokenizer tokenizer, IParser parser, IN
 {
     public double Evaluate(string expression)
     {
-        IEnumerable<Token> tokens = tokenizer.Tokenize(expression);
+        List<Token> tokens = tokenizer.Tokenize(expression);
         Node ast = parser.Parse(tokens);
         return nodeEvaluator.Evaluate(ast);
     }
